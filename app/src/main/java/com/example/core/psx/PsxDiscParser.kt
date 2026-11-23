@@ -3,7 +3,7 @@ package com.example.core.psx
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
-import java.io.RandomAccessFile
+import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
@@ -54,9 +54,10 @@ object PsxDiscParser {
         }
 
         contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-          RandomAccessFile("/proc/self/fd/${pfd.fd}", "r").use { raf ->
-            val fileSize = maxOf(reportedSize, raf.length())
-            val channel = raf.channel
+          FileInputStream(pfd.fileDescriptor).use { fis ->
+            val channel = fis.channel
+            val channelSize = runCatching { channel.size() }.getOrDefault(0L)
+            val fileSize = maxOf(reportedSize, pfd.statSize.coerceAtLeast(0L), channelSize)
             analyzeChannel(displayName, uri.toString(), fileSize, channel)
           }
         }
@@ -74,8 +75,8 @@ object PsxDiscParser {
     withContext(Dispatchers.IO) {
       runCatching {
         contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-          RandomAccessFile("/proc/self/fd/${pfd.fd}", "r").use { raf ->
-            val channel = raf.channel
+          FileInputStream(pfd.fileDescriptor).use { fis ->
+            val channel = fis.channel
             val safeLba = lba.coerceAtLeast(0)
             val byteOffset = safeLba.toLong() * sectorStride + userDataOffset
             val buf = readBytesAt(channel, byteOffset, 2048)
@@ -98,8 +99,8 @@ object PsxDiscParser {
     withContext(Dispatchers.IO) {
       runCatching {
         contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-          RandomAccessFile("/proc/self/fd/${pfd.fd}", "r").use { raf ->
-            val channel = raf.channel
+          FileInputStream(pfd.fileDescriptor).use { fis ->
+            val channel = fis.channel
             val targetEntry =
               analysis.files.firstOrNull {
                 !it.isDirectory &&
@@ -711,15 +712,17 @@ object PsxDiscParser {
   private fun queryDisplayNameAndSize(contentResolver: ContentResolver, uri: Uri): Pair<String, Long> {
     var name = uri.lastPathSegment?.substringAfterLast('/') ?: "disc_image.bin"
     var size = 0L
-    contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)
-      ?.use { cursor ->
-        if (cursor.moveToFirst()) {
-          val nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-          val sizeIdx = cursor.getColumnIndex(OpenableColumns.SIZE)
-          if (nameIdx >= 0) cursor.getString(nameIdx)?.let { name = it }
-          if (sizeIdx >= 0 && !cursor.isNull(sizeIdx)) size = cursor.getLong(sizeIdx)
+    runCatching {
+      contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)
+        ?.use { cursor ->
+          if (cursor.moveToFirst()) {
+            val nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            val sizeIdx = cursor.getColumnIndex(OpenableColumns.SIZE)
+            if (nameIdx >= 0) cursor.getString(nameIdx)?.let { name = it }
+            if (sizeIdx >= 0 && !cursor.isNull(sizeIdx)) size = cursor.getLong(sizeIdx)
+          }
         }
-      }
+    }
     return name to size
   }
 
