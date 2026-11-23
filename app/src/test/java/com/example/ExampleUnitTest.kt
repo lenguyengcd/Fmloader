@@ -2,12 +2,17 @@ package com.example
 
 import com.example.core.psx.DiscFormat
 import com.example.core.psx.DiscModStatus
+import com.example.core.psx.FmDirectRuntime
+import com.example.core.psx.FmDropWeightEntry
 import com.example.core.psx.PsxDiscParser
+import com.example.core.psx.PsxMipsEngine
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.random.Random
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -85,5 +90,82 @@ class ExampleUnitTest {
       assertEquals(3, analysis.files.size)
       assertTrue(analysis.exeHeader?.magicValid == true)
     }
+  }
+
+  @Test
+  fun `mips engine boots PS-X EXE and executes LUI ORI ADDIU instructions`() {
+    val exe = ByteArray(0x800 + 16)
+    "PS-X EXE".toByteArray(Charsets.US_ASCII).copyInto(exe, 0)
+    val buf = ByteBuffer.wrap(exe).order(ByteOrder.LITTLE_ENDIAN)
+    buf.putInt(0x10, 0x80010000.toInt()) // PC0
+    buf.putInt(0x14, 0x80100000.toInt()) // GP0
+    buf.putInt(0x18, 0x80010000.toInt()) // t_addr
+    buf.putInt(0x1C, 16) // t_size
+    buf.putInt(0x30, 0x801FFF00.toInt()) // sp
+
+    // lui $v0, 0x1234 -> 0x3C021234
+    buf.putInt(0x800, 0x3C021234)
+    // ori $v0, $v0, 0x5678 -> 0x34425678
+    buf.putInt(0x804, 0x34425678)
+    // addiu $a0, $v0, 2 -> 0x24440002
+    buf.putInt(0x808, 0x24440002)
+
+    val loaded = PsxMipsEngine.loadExeIntoRam(exe)
+    assertNotNull(loaded)
+    val (header, ram) = loaded!!
+    val initCpu = PsxMipsEngine.createInitialState(header)
+    val after = PsxMipsEngine.stepCycles(ram, initCpu, 3)
+
+    assertEquals(0x12345678L, after.v0)
+    assertEquals(0x1234567AL, after.a0)
+    assertEquals(3L, after.cyclesExecuted)
+    assertTrue(after.trace.first().mnemonic.startsWith("lui \$v0"))
+  }
+
+  @Test
+  fun `decodes packed 9-bit FM card stats and 4bpp TIM texture`() {
+    val ram = ByteArray(PsxMipsEngine.PS1_RAM_SIZE)
+    val tableOff = PsxMipsEngine.mapRamOffset(0x801D4244L)!!
+    val buf = ByteBuffer.wrap(ram).order(ByteOrder.LITTLE_ENDIAN)
+    // Fill 150 cards: ATK=3000 (300), DEF=2500 (250) -> packed = 300 or (250 shl 9)
+    val packedBlueEyes = 300 or (250 shl 9) or (1 shl 18) or (2 shl 22)
+    for (i in 0 until 150) {
+      buf.putInt(tableOff + i * 4, packedBlueEyes)
+    }
+    val (cards, addr) = FmDirectRuntime.extractFmCardStats(ram)
+    assertEquals(0x801D4244L, addr)
+    assertTrue(cards.size >= 150)
+    assertEquals(3000, cards[0].atk)
+    assertEquals(2500, cards[0].def)
+
+    // Minimal valid 8x8 4bpp TIM with 16-color CLUT
+    val tim = ByteArray(8 + (12 + 32) + (12 + 32))
+    val tBuf = ByteBuffer.wrap(tim).order(ByteOrder.LITTLE_ENDIAN)
+    tBuf.putInt(0, 0x10) // magic
+    tBuf.putInt(4, 0x08) // 4bpp + CLUT
+    tBuf.putInt(8, 12 + 32) // CLUT size
+    tBuf.putShort(20, 0x7FFF.toShort()) // palette color 0 non-zero
+    tBuf.putShort(22, 0x001F.toShort()) // palette color 1 red
+    val imgStart = 8 + 44
+    tBuf.putInt(imgStart, 12 + 32)
+    tBuf.putShort(imgStart + 8, 2) // wUnits = 2 -> width = 8 px
+    tBuf.putShort(imgStart + 10, 8) // height = 8 px
+    for (p in 0 until 32) tim[imgStart + 12 + p] = 0x10.toByte()
+
+    val decoded = FmDirectRuntime.tryDecodeTimAt(tim, 0)
+    assertNotNull(decoded)
+    assertEquals(8, decoded!!.width)
+    assertEquals(8, decoded.height)
+    assertEquals(4, decoded.bpp)
+
+    val drops =
+      FmDirectRuntime.rollDropsWithMultiplier(
+        dropPool = listOf(FmDropWeightEntry(1, 2000), FmDropWeightEntry(380, 1)),
+        cardsById = emptyMap(),
+        multiplier = 99,
+        rollCount = 5,
+        random = Random(42),
+      )
+    assertEquals(5, drops.size)
   }
 }

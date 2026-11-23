@@ -23,11 +23,28 @@
     <string name="status_cue">FILE CUE</string>
     <string name="label_bypass_active">Bỏ qua check BIN gốc</string>
     <string name="action_inspect">Soi Dữ Liệu</string>
-    <string name="action_launch_emulator">Mở bằng ePSXe / Emu</string>
+    <string name="action_run_direct">Chạy Trực Tiếp</string>
+    <string name="action_launch_emulator">Mở app giả lập ngoài</string>
     <string name="action_remove_disc">Xóa khỏi danh sách</string>
     <string name="err_invalid_uri">Không thể mở tệp. Hãy kiểm tra tệp còn tồn tại trên bộ nhớ.</string>
     <string name="msg_disc_added">Đã nạp %1$s (%2$s)</string>
     <string name="msg_no_emulator_found">Không thấy ePSXe / DuckStation / RetroArch; đang mở trình chọn ứng dụng.</string>
+
+    <!-- Direct In-App Runner -->
+    <string name="runner_title">Chạy Mod Trực Tiếp</string>
+    <string name="runner_back">Quay lại Đĩa</string>
+    <string name="runner_resume_banner">Đang chạy trực tiếp: %1$s</string>
+    <string name="runner_resume_btn">Mở lại</string>
+    <string name="runner_tab_cpu">CPU MIPS &amp; Boot</string>
+    <string name="runner_tab_cards">Thẻ Bài &amp; Tỷ Lệ Rơi</string>
+    <string name="runner_tab_textures">Ảnh .TIM Trong Đĩa</string>
+    <string name="runner_btn_play">Chạy Liên Tục</string>
+    <string name="runner_btn_pause">Tạm Dừng</string>
+    <string name="runner_btn_step">Bước +1</string>
+    <string name="runner_btn_step_burst">Chạy +50</string>
+    <string name="runner_btn_reset">Nạp Lại</string>
+    <string name="runner_btn_roll_drops">Thử Rơi 5 Thẻ (%1$dx)</string>
+    <string name="runner_honest_note">Chạy trực tiếp mã máy MIPS PS-X EXE, giải mã chỉ số thẻ bài, dựng ảnh .TIM RGB555 và tính rơi thẻ từ chính file .bin/.iso ngay trong app mà không chuyển sang emulator ngoài.</string>
 
     <!-- Inspector Screen -->
     <string name="inspector_empty_title">Chọn Đĩa Để Phân Tích</string>

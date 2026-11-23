@@ -669,7 +669,7 @@ object PsxDiscParser {
     }
   }
 
-  private fun readLogicalFileBytes(
+  internal fun readLogicalFileBytes(
     channel: FileChannel,
     startLba: Int,
     byteLength: Int,

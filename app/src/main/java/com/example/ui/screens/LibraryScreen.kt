@@ -65,6 +65,7 @@ import com.example.core.psx.DiscFormat
 import com.example.core.psx.DiscModStatus
 import com.example.data.DiscEntryEntity
 import com.example.data.RecompiledSettings
+import com.example.ui.DirectRunnerUiState
 import com.example.ui.LibraryFilter
 import com.example.ui.components.MetricCard
 import com.example.ui.components.ModStatusBadge
@@ -85,13 +86,15 @@ fun LibraryScreen(
   grantedFolders: List<Pair<String, String>>,
   isImporting: Boolean,
   isScanningFolders: Boolean,
+  directRunnerState: DirectRunnerUiState,
   onFilterChange: (LibraryFilter) -> Unit,
   onPickDiscFile: () -> Unit,
   onGrantFolderAccess: () -> Unit,
   onRescanFolders: () -> Unit,
   onRevokeFolder: (String) -> Unit,
   onInspectDisc: (DiscEntryEntity) -> Unit,
-  onLaunchEmulator: (DiscEntryEntity) -> Unit,
+  onRunDirect: (DiscEntryEntity) -> Unit,
+  onResumeRunner: () -> Unit,
   onRescanDisc: (DiscEntryEntity) -> Unit,
   onRemoveDisc: (DiscEntryEntity) -> Unit,
   modifier: Modifier = Modifier,
@@ -118,6 +121,43 @@ fun LibraryScreen(
           isImporting = isImporting,
           onPickDiscFile = onPickDiscFile,
         )
+      }
+
+      if (directRunnerState is DirectRunnerUiState.Running) {
+        item {
+          Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            border = BorderStroke(1.dp, EmeraldVerified.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+              Text(
+                text =
+                  stringResource(
+                    R.string.runner_resume_banner,
+                    directRunnerState.session.analysis.displayName,
+                  ),
+                style = MaterialTheme.typography.titleSmall,
+                color = EmeraldVerified,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+              )
+              Spacer(modifier = Modifier.width(8.dp))
+              Button(
+                onClick = onResumeRunner,
+                modifier = Modifier.heightIn(min = 48.dp).testTag("resume_direct_runner_btn"),
+              ) {
+                Text(stringResource(R.string.runner_resume_btn))
+              }
+            }
+          }
+        }
       }
 
       item {
@@ -198,7 +238,7 @@ fun LibraryScreen(
             index = idx,
             bypassActive = settings.bypassOriginalBinCheck,
             onInspect = { onInspectDisc(disc) },
-            onLaunch = { onLaunchEmulator(disc) },
+            onRunDirect = { onRunDirect(disc) },
             onRescan = { onRescanDisc(disc) },
             onRemove = { onRemoveDisc(disc) },
           )
@@ -356,7 +396,7 @@ private fun DiscLibraryCard(
   index: Int,
   bypassActive: Boolean,
   onInspect: () -> Unit,
-  onLaunch: () -> Unit,
+  onRunDirect: () -> Unit,
   onRescan: () -> Unit,
   onRemove: () -> Unit,
 ) {
@@ -491,18 +531,18 @@ private fun DiscLibraryCard(
           Text(stringResource(R.string.action_inspect), color = CyberCyan, maxLines = 1)
         }
         Button(
-          onClick = onLaunch,
+          onClick = onRunDirect,
           colors =
             ButtonDefaults.buttonColors(
               containerColor = MillenniumGold,
               contentColor = Color(0xFF211700),
             ),
           modifier =
-            Modifier.weight(1f).heightIn(min = 48.dp).testTag("launch_emu_button_$index"),
+            Modifier.weight(1f).heightIn(min = 48.dp).testTag("run_direct_button_$index"),
         ) {
           Icon(Icons.Filled.PlayArrow, contentDescription = null)
           Spacer(modifier = Modifier.width(6.dp))
-          Text(stringResource(R.string.action_launch_emulator), maxLines = 1)
+          Text(stringResource(R.string.action_run_direct), maxLines = 1)
         }
       }
     }

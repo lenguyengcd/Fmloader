@@ -23,11 +23,28 @@
     <string name="status_cue">CUE SHEET</string>
     <string name="label_bypass_active">Mod Bypass Ready</string>
     <string name="action_inspect">Inspect &amp; Tools</string>
-    <string name="action_launch_emulator">Open in ePSXe / Emu</string>
+    <string name="action_run_direct">Run Direct</string>
+    <string name="action_launch_emulator">Open External Emu</string>
     <string name="action_remove_disc">Remove from list</string>
     <string name="err_invalid_uri">Could not open file. Check that the file still exists on storage.</string>
     <string name="msg_disc_added">Loaded %1$s (%2$s)</string>
     <string name="msg_no_emulator_found">No PS1 emulator (ePSXe / DuckStation / RetroArch) detected; opening system file chooser.</string>
+
+    <!-- Direct In-App Runner -->
+    <string name="runner_title">Direct Mod Runner</string>
+    <string name="runner_back">Back to Discs</string>
+    <string name="runner_resume_banner">Active Session: %1$s</string>
+    <string name="runner_resume_btn">Open Runner</string>
+    <string name="runner_tab_cpu">MIPS CPU &amp; Boot</string>
+    <string name="runner_tab_cards">Card Table &amp; Drops</string>
+    <string name="runner_tab_textures">.TIM Textures</string>
+    <string name="runner_btn_play">Auto Run</string>
+    <string name="runner_btn_pause">Pause</string>
+    <string name="runner_btn_step">Step +1</string>
+    <string name="runner_btn_step_burst">Run +50</string>
+    <string name="runner_btn_reset">Reset Boot</string>
+    <string name="runner_btn_roll_drops">Roll 5 Duel Drops (%1$dx)</string>
+    <string name="runner_honest_note">Runs real PS-X EXE MIPS stepping, binary card stat decoding, .TIM RGB555 rendering, and weighted drop rolls directly inside this app without leaving to an external emulator.</string>
 
     <!-- Inspector Screen -->
     <string name="inspector_empty_title">Select a Disc to Inspect</string>

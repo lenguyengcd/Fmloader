@@ -60,6 +60,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.ui.MainViewModel
+import com.example.ui.screens.DirectRunnerScreen
 import com.example.ui.screens.InspectorScreen
 import com.example.ui.screens.LibraryScreen
 import com.example.ui.screens.MemCardScreen
@@ -74,6 +75,7 @@ private object Routes {
   const val PATCHER = "patcher"
   const val MEMCARD = "memcard"
   const val RECOMPILED = "recompiled"
+  const val RUNNER = "runner"
 }
 
 private data class NavTabItem(
@@ -147,6 +149,7 @@ fun FmModLoaderApp(vm: MainViewModel = viewModel()) {
   val inspectionState by vm.inspectionState.collectAsStateWithLifecycle()
   val patcherState by vm.patcherState.collectAsStateWithLifecycle()
   val memCardState by vm.memCardState.collectAsStateWithLifecycle()
+  val directRunnerState by vm.directRunnerState.collectAsStateWithLifecycle()
   val settings by vm.settings.collectAsStateWithLifecycle()
   val installedEmulators by vm.installedEmulators.collectAsStateWithLifecycle()
   val snackbarMessage by vm.snackbarMessage.collectAsStateWithLifecycle()
@@ -296,6 +299,7 @@ fun FmModLoaderApp(vm: MainViewModel = viewModel()) {
                 grantedFolders = grantedFolders,
                 isImporting = isImportingDisc,
                 isScanningFolders = isScanningFolders,
+                directRunnerState = directRunnerState,
                 onFilterChange = vm::setLibraryFilter,
                 onPickDiscFile = { pickDiscLauncher.launch(arrayOf("*/*")) },
                 onGrantFolderAccess = { grantFolderTreeLauncher.launch(null) },
@@ -305,9 +309,28 @@ fun FmModLoaderApp(vm: MainViewModel = viewModel()) {
                   vm.inspectDisc(entity)
                   navigateToTab(Routes.INSPECTOR)
                 },
-                onLaunchEmulator = vm::launchInEmulator,
+                onRunDirect = { entity ->
+                  vm.launchDirectRunner(entity)
+                  navController.navigate(Routes.RUNNER) { launchSingleTop = true }
+                },
+                onResumeRunner = {
+                  navController.navigate(Routes.RUNNER) { launchSingleTop = true }
+                },
                 onRescanDisc = vm::rescanDisc,
                 onRemoveDisc = vm::removeDisc,
+              )
+            }
+
+            composable(Routes.RUNNER) {
+              DirectRunnerScreen(
+                runnerState = directRunnerState,
+                settings = settings,
+                onBack = { navController.popBackStack() },
+                onStepCycles = vm::stepCpuCycles,
+                onToggleAutoRun = vm::toggleCpuAutoRun,
+                onResetCpu = vm::resetCpuBoot,
+                onRollDrops = vm::rollModDrops,
+                onOpenExternalEmu = vm::launchInEmulator,
               )
             }
 

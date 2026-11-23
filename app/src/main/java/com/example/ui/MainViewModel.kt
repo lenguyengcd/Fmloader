@@ -8,13 +8,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.R
 import com.example.core.psx.DiscBinaryScanResult
 import com.example.core.psx.DiscModStatus
+import com.example.core.psx.FmDirectRuntime
+import com.example.core.psx.FmDirectSession
 import com.example.core.psx.MemCardSlot
 import com.example.core.psx.PpfApplyResult
 import com.example.core.psx.PpfPatchEngine
 import com.example.core.psx.PpfPatchMetadata
 import com.example.core.psx.PsxDiscAnalysis
+import com.example.core.psx.PsxDiscParser
 import com.example.core.psx.PsxMemCardParser
 import com.example.core.psx.PsxMemoryCard
+import com.example.core.psx.PsxMipsEngine
 import com.example.core.psx.SafFolderScanner
 import com.example.core.psx.SectorHexDump
 import com.example.data.DetectedEmulator
@@ -24,6 +28,8 @@ import com.example.data.EmulatorLauncher
 import com.example.data.RecompiledSettings
 import com.example.data.RecompiledSettingsRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +37,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -77,6 +84,20 @@ sealed interface MemCardUiState {
   data class Loaded(val card: PsxMemoryCard) : MemCardUiState
 
   data class Error(val message: String) : MemCardUiState
+}
+
+sealed interface DirectRunnerUiState {
+  data object Idle : DirectRunnerUiState
+
+  data class Booting(val discName: String) : DirectRunnerUiState
+
+  data class Running(
+    val entity: DiscEntryEntity,
+    val session: FmDirectSession,
+    val isAutoRunning: Boolean = false,
+  ) : DirectRunnerUiState
+
+  data class Error(val discName: String, val message: String) : DirectRunnerUiState
 }
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -139,6 +160,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   private val _memCardState = MutableStateFlow<MemCardUiState>(MemCardUiState.Idle)
   val memCardState: StateFlow<MemCardUiState> = _memCardState.asStateFlow()
+
+  private val _directRunnerState = MutableStateFlow<DirectRunnerUiState>(DirectRunnerUiState.Idle)
+  val directRunnerState: StateFlow<DirectRunnerUiState> = _directRunnerState.asStateFlow()
+
+  private var autoRunJob: Job? = null
 
   private val _pendingMcsExportSlot = MutableStateFlow<MemCardSlot?>(null)
   val pendingMcsExportSlot: StateFlow<MemCardSlot?> = _pendingMcsExportSlot.asStateFlow()
@@ -365,6 +391,111 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
       }
       res.onFailure { err -> _snackbarMessage.value = err.message ?: "Scan failed" }
+    }
+  }
+
+  fun launchDirectRunner(entity: DiscEntryEntity) {
+    stopAutoRun()
+    val uri = Uri.parse(entity.uriString)
+    viewModelScope.launch {
+      _directRunnerState.value = DirectRunnerUiState.Booting(entity.displayName)
+      val analysisRes = PsxDiscParser.analyzeDisc(contentResolver, uri)
+      analysisRes
+        .onFailure { err ->
+          _directRunnerState.value =
+            DirectRunnerUiState.Error(
+              entity.displayName,
+              err.message ?: appContext.getString(R.string.err_invalid_uri),
+            )
+        }
+        .onSuccess { analysis ->
+          FmDirectRuntime.bootDiscDirect(contentResolver, uri, analysis)
+            .onSuccess { session ->
+              _directRunnerState.value =
+                DirectRunnerUiState.Running(
+                  entity = entity,
+                  session = session,
+                  isAutoRunning = false,
+                )
+            }
+            .onFailure { err ->
+              _directRunnerState.value =
+                DirectRunnerUiState.Error(
+                  entity.displayName,
+                  err.message ?: "Direct boot failed.",
+                )
+            }
+        }
+    }
+  }
+
+  fun stepCpuCycles(count: Int) {
+    val current = _directRunnerState.value as? DirectRunnerUiState.Running ?: return
+    if (current.session.ramImage.isEmpty() || current.session.cpu.halted) return
+    val nextCpu = PsxMipsEngine.stepCycles(current.session.ramImage, current.session.cpu, count)
+    _directRunnerState.value =
+      current.copy(
+        session = current.session.copy(cpu = nextCpu),
+        isAutoRunning = if (nextCpu.halted) false else current.isAutoRunning,
+      )
+    if (nextCpu.halted) {
+      stopAutoRun()
+    }
+  }
+
+  fun toggleCpuAutoRun() {
+    val current = _directRunnerState.value as? DirectRunnerUiState.Running ?: return
+    if (current.isAutoRunning) {
+      stopAutoRun()
+      return
+    }
+    if (current.session.ramImage.isEmpty() || current.session.cpu.halted) return
+    _directRunnerState.value = current.copy(isAutoRunning = true)
+    autoRunJob?.cancel()
+    autoRunJob =
+      viewModelScope.launch {
+        while (isActive) {
+          val state = _directRunnerState.value as? DirectRunnerUiState.Running ?: break
+          if (!state.isAutoRunning || state.session.cpu.halted) break
+          stepCpuCycles(32)
+          delay(120L)
+        }
+        stopAutoRun()
+      }
+  }
+
+  fun resetCpuBoot() {
+    stopAutoRun()
+    val current = _directRunnerState.value as? DirectRunnerUiState.Running ?: return
+    val bootedCpu =
+      if (!current.session.initialCpu.halted && current.session.ramImage.isNotEmpty()) {
+        PsxMipsEngine.stepCycles(current.session.ramImage, current.session.initialCpu, 24)
+      } else {
+        current.session.initialCpu
+      }
+    _directRunnerState.value =
+      current.copy(session = current.session.copy(cpu = bootedCpu), isAutoRunning = false)
+  }
+
+  fun rollModDrops() {
+    val current = _directRunnerState.value as? DirectRunnerUiState.Running ?: return
+    val cardsById = current.session.cards.associateBy { it.cardId }
+    val rolls =
+      FmDirectRuntime.rollDropsWithMultiplier(
+        dropPool = current.session.dropPool,
+        cardsById = cardsById,
+        multiplier = settings.value.dropRateMultiplier,
+        rollCount = 5,
+      )
+    _directRunnerState.value = current.copy(session = current.session.copy(dropRolls = rolls))
+  }
+
+  private fun stopAutoRun() {
+    autoRunJob?.cancel()
+    autoRunJob = null
+    val current = _directRunnerState.value as? DirectRunnerUiState.Running ?: return
+    if (current.isAutoRunning) {
+      _directRunnerState.value = current.copy(isAutoRunning = false)
     }
   }
 
