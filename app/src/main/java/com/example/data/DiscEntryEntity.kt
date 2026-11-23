@@ -1,11 +1,7 @@
 package com.example.data
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "disc_entries")
 data class DiscEntryEntity(
-  @PrimaryKey val uriString: String,
+  val uriString: String,
   val displayName: String,
   val volumeId: String,
   val serialCode: String,

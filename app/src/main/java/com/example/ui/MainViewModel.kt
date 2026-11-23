@@ -17,7 +17,6 @@ import com.example.core.psx.PsxMemCardParser
 import com.example.core.psx.PsxMemoryCard
 import com.example.core.psx.SafFolderScanner
 import com.example.core.psx.SectorHexDump
-import com.example.data.AppDatabase
 import com.example.data.DetectedEmulator
 import com.example.data.DiscEntryEntity
 import com.example.data.DiscRepository
@@ -84,8 +83,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   private val appContext = application.applicationContext
   private val contentResolver = appContext.contentResolver
-  private val discRepository =
-    DiscRepository(AppDatabase.getInstance(appContext).discEntryDao(), contentResolver)
+  private val discRepository = DiscRepository(appContext)
   private val settingsRepository = RecompiledSettingsRepository(appContext)
 
   val discs: StateFlow<List<DiscEntryEntity>> =
