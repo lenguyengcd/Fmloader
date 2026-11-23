@@ -1,0 +1,80 @@
+<resources>
+    <string name="app_name">FM Mod Loader</string>
+    <string name="app_subtitle">Đọc file Mod Yu-Gi-Oh! PS1 như ePSXe &amp; Recompiled</string>
+
+    <!-- Navigation -->
+    <string name="nav_library">Đĩa Mod</string>
+    <string name="nav_inspector">Phân tích</string>
+    <string name="nav_patcher">Gắn PPF</string>
+    <string name="nav_memcard">Thẻ nhớ</string>
+    <string name="nav_recompiled">Cấu hình</string>
+
+    <!-- Library Screen -->
+    <string name="hero_badge">ĐÃ BỎ KHÓA FILE BIN GỐC</string>
+    <string name="hero_title">Đọc File Mod PS1 Như ePSXe</string>
+    <string name="hero_desc">Mở trực tiếp file mod .bin, .iso, .img, .pbp &amp; .cue mà không bị lỗi kiểm tra hash SLUS-01411 gốc.</string>
+    <string name="btn_load_rom">Chọn File Mod / BIN / ISO</string>
+    <string name="btn_rescan">Quét lại</string>
+    <string name="empty_library_title">Chưa Có File Mod PS1 Nào</string>
+    <string name="empty_library_desc">Chọn bất kỳ file Yu-Gi-Oh! Forbidden Memories mod (.bin, .iso, .img, .pbp, .cue) từ bộ nhớ máy. Không cần file .bin gốc.</string>
+    <string name="status_modded">BẢN MOD</string>
+    <string name="status_vanilla">BIN GỐC</string>
+    <string name="status_psx">ĐĨA PS1</string>
+    <string name="status_cue">FILE CUE</string>
+    <string name="label_bypass_active">Bỏ qua check BIN gốc</string>
+    <string name="action_inspect">Soi Dữ Liệu</string>
+    <string name="action_launch_emulator">Mở bằng ePSXe / Emu</string>
+    <string name="action_remove_disc">Xóa khỏi danh sách</string>
+    <string name="err_invalid_uri">Không thể mở tệp. Hãy kiểm tra tệp còn tồn tại trên bộ nhớ.</string>
+    <string name="msg_disc_added">Đã nạp %1$s (%2$s)</string>
+    <string name="msg_no_emulator_found">Không thấy ePSXe / DuckStation / RetroArch; đang mở trình chọn ứng dụng.</string>
+
+    <!-- Inspector Screen -->
+    <string name="inspector_empty_title">Chọn Đĩa Để Phân Tích</string>
+    <string name="inspector_empty_desc">Chọn một file .bin, .iso hoặc .pbp ở tab Đĩa Mod để xem cây thư mục ISO-9660, tệp SLUS và dữ liệu mod WA_MRG.MRG.</string>
+    <string name="inspector_tab_files">Tệp ISO-9660</string>
+    <string name="inspector_tab_cards">Quét EXE &amp; Thẻ</string>
+    <string name="inspector_tab_hex">Xem Hex Sector</string>
+    <string name="label_system_cnf">Cấu hình Boot SYSTEM.CNF</string>
+    <string name="label_psx_exe">Header Thực Thi PS-X</string>
+    <string name="label_wa_mrg_analysis">Kiểm Tra Mod WA_MRG.MRG</string>
+    <string name="label_bypass_explanation">Bản Recompiled gốc sẽ từ chối WA_MRG.MRG đã chỉnh sửa. Chế độ Mod Loader đọc trực tiếp các sector đã mod.</string>
+    <string name="btn_scan_cards">Quét Dữ Liệu Thẻ &amp; Chuỗi Trong BIN</string>
+    <string name="btn_read_sector">Đọc Sector</string>
+    <string name="hint_sector_number">Số Sector LBA (vd: 16)</string>
+
+    <!-- PPF Patcher Screen -->
+    <string name="patcher_title">Gắn Patch Mod PPF</string>
+    <string name="patcher_desc">Áp dụng bản mod PlayStation Patch Format (.ppf v1/v2/v3) vào file .bin/.iso ngay trên Android.</string>
+    <string name="btn_select_base">1. Chọn File BIN / ISO Nền</string>
+    <string name="btn_select_ppf">2. Chọn File Patch .PPF</string>
+    <string name="btn_apply_ppf">3. Gắn Mod &amp; Lưu File BIN Mới</string>
+    <string name="label_ppf_summary">Thông Tin Header Patch</string>
+    <string name="msg_patch_success">Đã lưu file mod thành công (áp dụng %1$d khối patch).</string>
+
+    <!-- Memory Card Screen -->
+    <string name="memcard_title">Đọc Thẻ Nhớ PS1</string>
+    <string name="memcard_desc">Kiểm tra file save .mcr, .mcd, .gme và .bin 128KB tương thích ePSXe &amp; FM Recompiled.</string>
+    <string name="btn_load_memcard">Mở Thẻ Nhớ (.mcr / .mcd / .gme)</string>
+    <string name="memcard_empty_title">Chưa Nạp Thẻ Nhớ</string>
+    <string name="memcard_empty_desc">Mở tệp thẻ nhớ ePSXe hoặc PS1 để xem 15 block lưu, biểu tượng pixel và dữ liệu save Yu-Gi-Oh! FM.</string>
+    <string name="btn_export_mcs">Xuất File .MCS</string>
+
+    <!-- Recompiled Config Screen -->
+    <string name="recompiled_title">Cấu Hình Mod Recompiled</string>
+    <string name="recompiled_desc">Thiết lập tùy chọn nạp file mod kiểu Yu-Gi-Oh! FM Recompiled &amp; ePSXe.</string>
+    <string name="btn_export_config">Xuất fm_recompiled_mod.json</string>
+    <string name="msg_config_exported">Đã xuất cấu hình mod Recompiled.</string>
+
+    <!-- Storage Folder Access Permission -->
+    <string name="storage_perm_dialog_title">Cấp Quyền Truy Cập Bộ Nhớ</string>
+    <string name="storage_perm_dialog_desc">Android 11+ chặn cấp quyền trực tiếp thư mục gốc Download hoặc Bộ nhớ trong. Hãy chọn một thư mục con (vd: Download/PS1, epsxe/isos), HOẶC bấm Chọn File Trực Tiếp để mở ngay file .bin/.iso trong Download mà không bị giới hạn.</string>
+    <string name="btn_grant_storage_access">Chọn Thư Mục Con</string>
+    <string name="btn_pick_files_direct">Chọn File Trực Tiếp</string>
+    <string name="btn_later">Để sau</string>
+    <string name="storage_status_missing">Quyền bộ nhớ: Chọn thư mục con hoặc chọn file trực tiếp</string>
+    <string name="storage_status_granted">Quyền bộ nhớ: Đã cấp (%1$d thư mục)</string>
+    <string name="btn_scan_folders">Quét thư mục</string>
+    <string name="btn_add_folder">Thêm thư mục con</string>
+    <string name="msg_folder_scanned">Đã quét %1$s: tìm thấy %2$d file đĩa PS1.</string>
+</resources>

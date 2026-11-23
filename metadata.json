@@ -1,0 +1,6 @@
+{
+  "name": "FM Mod Loader",
+  "description": "Yu-Gi-Oh! Forbidden Memories PS1 modded BIN/ISO loader, ISO-9660 & WA_MRG inspector, PPF mod patcher, and PS1 Memory Card reader inspired by Recompiled & ePSXe.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

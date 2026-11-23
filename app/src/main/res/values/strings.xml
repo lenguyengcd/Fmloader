@@ -1,0 +1,80 @@
+<resources>
+    <string name="app_name">FM Mod Loader</string>
+    <string name="app_subtitle">Yu-Gi-Oh! PS1 Recompiled &amp; Mod Reader</string>
+
+    <!-- Navigation -->
+    <string name="nav_library">Discs</string>
+    <string name="nav_inspector">Inspector</string>
+    <string name="nav_patcher">PPF Patch</string>
+    <string name="nav_memcard">MemCard</string>
+    <string name="nav_recompiled">Recompiled</string>
+
+    <!-- Library Screen -->
+    <string name="hero_badge">BYPASS ORIGINAL BIN LOCK ACTIVE</string>
+    <string name="hero_title">Load Modded PS1 ROMs Like ePSXe</string>
+    <string name="hero_desc">Read modified .bin, .iso, .img, .pbp &amp; .cue discs directly without failing SLUS-01411 vanilla hash checks.</string>
+    <string name="btn_load_rom">Load Mod / BIN / ISO</string>
+    <string name="btn_rescan">Re-verify</string>
+    <string name="empty_library_title">No PS1 Mod Discs Loaded</string>
+    <string name="empty_library_desc">Select any Yu-Gi-Oh! Forbidden Memories modded .bin, .iso, .img, .pbp, or .cue file from your device storage. No original vanilla .bin required.</string>
+    <string name="status_modded">MODDED ROM</string>
+    <string name="status_vanilla">ORIGINAL BIN</string>
+    <string name="status_psx">PS1 DISC</string>
+    <string name="status_cue">CUE SHEET</string>
+    <string name="label_bypass_active">Mod Bypass Ready</string>
+    <string name="action_inspect">Inspect &amp; Tools</string>
+    <string name="action_launch_emulator">Open in ePSXe / Emu</string>
+    <string name="action_remove_disc">Remove from list</string>
+    <string name="err_invalid_uri">Could not open file. Check that the file still exists on storage.</string>
+    <string name="msg_disc_added">Loaded %1$s (%2$s)</string>
+    <string name="msg_no_emulator_found">No PS1 emulator (ePSXe / DuckStation / RetroArch) detected; opening system file chooser.</string>
+
+    <!-- Inspector Screen -->
+    <string name="inspector_empty_title">Select a Disc to Inspect</string>
+    <string name="inspector_empty_desc">Pick any loaded .bin, .iso, or .pbp from the Discs tab to browse its ISO-9660 filesystem, SLUS executable, and WA_MRG.MRG mod diffs.</string>
+    <string name="inspector_tab_files">ISO-9660 Files</string>
+    <string name="inspector_tab_cards">EXE &amp; Card Scan</string>
+    <string name="inspector_tab_hex">Sector Hex</string>
+    <string name="label_system_cnf">SYSTEM.CNF Boot Config</string>
+    <string name="label_psx_exe">PS-X Executable Header</string>
+    <string name="label_wa_mrg_analysis">WA_MRG.MRG Mod Verification</string>
+    <string name="label_bypass_explanation">Vanilla Recompiled rejects modified WA_MRG.MRG hashes. Mod Loader Mode mounts modded sectors directly.</string>
+    <string name="btn_scan_cards">Scan Loaded BIN for Card &amp; Text Entries</string>
+    <string name="btn_read_sector">Read Sector</string>
+    <string name="hint_sector_number">LBA Sector (e.g. 16)</string>
+
+    <!-- PPF Patcher Screen -->
+    <string name="patcher_title">PPF Mod Patcher</string>
+    <string name="patcher_desc">Apply PlayStation Patch Format (.ppf v1/v2/v3) mods onto a base .bin/.iso directly on Android.</string>
+    <string name="btn_select_base">1. Select Base BIN / ISO</string>
+    <string name="btn_select_ppf">2. Select .PPF Mod Patch</string>
+    <string name="btn_apply_ppf">3. Patch &amp; Save Modded BIN</string>
+    <string name="label_ppf_summary">Patch Header Analysis</string>
+    <string name="msg_patch_success">Modded disc saved successfully (%1$d patch blocks applied).</string>
+
+    <!-- Memory Card Screen -->
+    <string name="memcard_title">PS1 Memory Card Reader</string>
+    <string name="memcard_desc">Inspect .mcr, .mcd, .gme, and 128KB .bin saves compatible with ePSXe and FM Recompiled.</string>
+    <string name="btn_load_memcard">Open Memory Card (.mcr / .mcd / .gme)</string>
+    <string name="memcard_empty_title">No Memory Card Loaded</string>
+    <string name="memcard_empty_desc">Load an ePSXe or PS1 memory card file to view save blocks, pixel icons, and Forbidden Memories slots.</string>
+    <string name="btn_export_mcs">Export .MCS Save</string>
+
+    <!-- Recompiled Config Screen -->
+    <string name="recompiled_title">Recompiled Mod Engine</string>
+    <string name="recompiled_desc">Configure Yu-Gi-Oh! FM Recompiled &amp; ePSXe-style loader flags for modded discs.</string>
+    <string name="btn_export_config">Export fm_recompiled_mod.json</string>
+    <string name="msg_config_exported">Exported Recompiled mod configuration.</string>
+
+    <!-- Storage Folder Access Permission -->
+    <string name="storage_perm_dialog_title">Grant Storage Access</string>
+    <string name="storage_perm_dialog_desc">Android 11+ restricts granting the root Download or Internal Storage folder. Pick a subfolder (e.g. Download/PS1 or ePSXe/isos), OR pick one/many .bin/.iso files directly from Download with zero folder restrictions.</string>
+    <string name="btn_grant_storage_access">Grant Subfolder Access</string>
+    <string name="btn_pick_files_direct">Pick Mod Files Directly</string>
+    <string name="btn_later">Later</string>
+    <string name="storage_status_missing">Storage Access: Pick Subfolder or Direct Files</string>
+    <string name="storage_status_granted">Storage Access: Granted (%1$d folder)</string>
+    <string name="btn_scan_folders">Scan Folders</string>
+    <string name="btn_add_folder">Add Subfolder</string>
+    <string name="msg_folder_scanned">Scanned %1$s: found %2$d PS1 disc(s).</string>
+</resources>
